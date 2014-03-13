@@ -1,0 +1,3 @@
+GitPython==0.3.2.RC1
+Twisted==13.1
+blinker==1.3
