@@ -1,10 +1,9 @@
 #requires python > 2.5 or so i think for glob
-
-import os
-from glob import glob
+import os, logging
+from glob2 import glob
 from fnmatch import fnmatch
 
-def clean_task(path=[], exclude=[], cwd="", minsize=10):
+def clean_task(path=[], exclude=[], cwd="", minsize=10,catch=False):
     """
     Start cleaning in the given path
 
@@ -27,15 +26,20 @@ def clean_task(path=[], exclude=[], cwd="", minsize=10):
 
     modified = []
 
+    logging.info("Checking the dirty %d files", len(pathes))
+
     for path in pathes:
-        if any( fnmatch(path, x) for x in exclude ):
+        # not file or matches an exclude pattern
+        if not os.path.isfile(path) or any( fnmatch(path, x) for x in exclude ):
             continue
         #current path dont match exclude filter we're good to start wreckin havoc
         try:
             if os.path.getsize(path) > minsize:
                 open(path, 'w').close() #empty the file
                 modified.append(path)
-        except OSError:
-            pass #what do?
+                logging.debug("Nullified " + path)
+        except OSError, e:
+            if not catch:
+                raise e
 
     return modified

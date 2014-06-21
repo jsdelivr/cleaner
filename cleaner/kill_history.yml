@@ -1,0 +1,24 @@
+#Git commands to remove the history tracking of a repo
+#see https://github.com/zuha/Zuha/wiki/Git-Reduce-Repo-Size
+#these commands will be run via shell in the cwd set in config.yml
+#requires git > 1.7 tested with git 1.7.1
+#heads up this shit takes a long as time for 1.5k commits and 40k files... i watched a 3hr movie doin this the first time
+
+#slowest part... takes hours to do the whole thing
+- command: git filter-branch -f --index-filter '(cd {anticwd} && python clean.py --path={path}) && git checkout-index -n -f -a && git update-index --ignore-missing --refresh'
+# - command: git filter-branch --index-filter 'git rm --cached --ignore-unmatch {path} --quiet' -- {destroy_commits}
+
+
+#not supported on windows -- not worth working around
+- command: rm -rf .git/refs/original
+  catch_exception: true
+
+- command: git reflog expire --expire=now --all
+
+- command: git fsck --full --unreachable
+
+- command: git repack -A -d
+
+- command: git gc --aggressive --prune=now
+
+- command: git push --force
